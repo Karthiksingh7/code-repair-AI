@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f5f0">
+    <meta name="description" content="A repository-aware program repair workspace that combines layered project knowledge with automated validation.">
+    <title>Patchwork — Repair Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/app.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="Patchwork home" data-view="overview">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span>patchwork<span class="brand-period">.</span></span>
+        </a>
+
+        <div class="workspace-picker">
+          <span class="workspace-avatar">P</span>
+          <span class="workspace-name"><strong>Local workspace</strong><small id="workspacePlan">Private · on your device</small></span>
+        </div>
+
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="primary-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span>Overview</button>
+          <button class="nav-item" data-view="repairs"><span class="nav-icon">⌘</span>Repair queue<span class="nav-count" id="navRepairCount">0</span></button>
+          <button class="nav-item" data-view="knowledge"><span class="nav-icon">◈</span>Knowledge base</button>
+          <button class="nav-item" data-view="validation"><span class="nav-icon">✓</span>Test runs</button>
+          <button class="nav-item" data-view="history"><span class="nav-icon">↺</span>History</button>
+        </nav>
+
+        <div class="sidebar-projects">
+          <div class="sidebar-section-heading"><p class="nav-label">YOUR REPOSITORIES</p><button class="icon-button tiny" aria-label="Connect a repository" title="Connect a repository" data-action="connect-repo">+</button></div>
+          <div id="repositoryNav"><p class="repo-empty-note">Connect a repository to begin.</p></div>
+        </div>
+
+        <div class="sidebar-spacer"></div>
+        <div class="usage-card"><div class="usage-heading"><span>Repair flow</span><span>● Local</span></div><div class="usage-note">Bug details → repository context → project knowledge. Patches are proposed, never silently applied.</div></div>
+        <button class="profile-button">
+          <span class="profile-avatar">KM</span>
+          <span><strong>Karthik M.</strong><small>Workspace admin</small></span>
+          <span class="chevron">···</span>
+        </button>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation">☰</button>
+          <div class="breadcrumb"><span>Local workspace</span><span class="crumb-slash">/</span><strong id="breadcrumbCurrent">Overview</strong></div>
+          <div class="topbar-actions">
+            <span class="sync-status"><span class="live-dot"></span><span id="serverStatus">Checking local backend…</span></span>
+            <button class="icon-button notification-button" aria-label="Notifications">♧<i></i></button>
+            <span class="topbar-divider"></span>
+            <button class="help-button">Help center <span>↗</span></button>
+          </div>
+        </header>
+
+        <div class="page-wrap">
+          <section class="view-panel active" id="view-overview">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow"><span class="eyebrow-mark"></span><span id="currentDate"></span></p>
+                <h1>Your repository, repaired with context. <span class="wave">✳</span></h1>
+                <p class="heading-subtitle">Progressive, test-checked fixes for the code you choose.</p>
+              </div>
+              <button class="button button-secondary" data-action="connect-repo"><span class="button-plus">＋</span> Connect repository</button>
+            </div>
+
+            <div class="project-banner">
+              <div class="project-id"><span class="project-logo">⌘</span><div><p class="eyebrow light-eyebrow">ACTIVE REPOSITORY</p><h2 id="activeRepositoryName">No repository connected</h2></div></div>
+              <div class="banner-divider"></div>
+              <div class="project-fact"><span>Indexed source files</span><strong id="bannerSourceCount">Connect a repository</strong></div>
+              <div class="project-fact"><span>Detected language</span><strong id="bannerLanguage">Not indexed</strong></div>
+              <button class="banner-link" data-view="knowledge">Repository details <span>→</span></button>
+              <span class="banner-sparkle sparkle-one">✳</span><span class="banner-sparkle sparkle-two">·</span>
+            </div>
+
+            <div class="stats-grid">
+              <article class="stat-card">
+                <div class="stat-top"><span class="stat-label">Source files indexed</span><span class="stat-icon coral-icon">⌘</span></div>
+                <div class="stat-value" id="statFiles">0</div>
+                <p class="stat-caption">Application and test files</p>
+                <div class="mini-bars bars-coral" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-top"><span class="stat-label">Test-passing patches</span><span class="stat-icon green-icon">✓</span></div>
+                <div class="stat-value" id="statPassed">0</div>
+                <p class="stat-caption">For repairs in this session</p>
+                <div class="mini-bars bars-green" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              </article>
+              <article class="stat-card">
+                <div class="stat-top"><span class="stat-label">Project documents</span><span class="stat-icon lilac-icon">◈</span></div>
+                <div class="stat-value" id="statDocuments">0</div>
+                <p class="stat-caption">Documentation and checked-in issues</p>
+                <div class="coverage-bar"><span id="coverageBar"></span></div>
+              </article>
+            </div>
+
+            <div class="content-grid">
+              <section class="surface-card repairs-card">
+                <div class="section-header">
+                  <div><p class="eyebrow">REPAIR QUEUE</p><h2>Recent repairs <span class="count-pill" id="overviewRepairCount">0</span></h2></div>
+                  <button class="subtle-button" data-view="repairs">View all <span>→</span></button>
+                </div>
+                <div class="repair-list" id="repairList"><div class="gentle-empty">Connect a repository and start a repair to see its real test results here.</div></div>
+              </section>
+
+              <section class="surface-card knowledge-card">
+                <div class="section-header">
+                  <div><p class="eyebrow">CONTEXT THAT MAKES A DIFFERENCE</p><h2>Knowledge layers</h2></div>
+                  <button class="icon-button tiny" aria-label="Knowledge layer details" data-view="knowledge">↗</button>
+                </div>
+                <p class="knowledge-intro">Every repair sees more than the failing line.</p>
+                <button class="knowledge-layer" data-layer="bug">
+                  <span class="layer-icon bug-icon">⌁</span><span class="layer-copy"><strong>Bug knowledge</strong><small>Failing function · bug description · tests</small></span><span class="layer-count">Tier 01</span><span class="layer-chevron">›</span>
+                </button>
+                <button class="knowledge-layer" data-layer="repo">
+                  <span class="layer-icon repo-icon">⌘</span><span class="layer-copy"><strong>Repository knowledge</strong><small>Python AST · Git history · dependencies</small></span><span class="layer-count">Tier 02</span><span class="layer-chevron">›</span>
+                </button>
+                <button class="knowledge-layer" data-layer="project">
+                  <span class="layer-icon project-icon">▤</span><span class="layer-copy"><strong>Project knowledge</strong><small>Matched documentation · checked-in issues</small></span><span class="layer-count">Tier 03</span><span class="layer-chevron">›</span>
+                </button>
+                <div class="knowledge-foot"><span class="tiny-check">↗</span><span id="contextState">Connect a repository to analyze its real context.</span></div>
+              </section>
+            </div>
+
+            <div class="bottom-grid">
+              <section class="surface-card activity-card">
+                <div class="section-header"><div><p class="eyebrow">YOUR WORKSPACE</p><h2>Recent activity</h2></div><button class="subtle-button" data-view="history">See history <span>→</span></button></div>
+                <div class="activity-feed" id="activityFeed"><div class="gentle-empty">Real activity appears after you connect a repository and validate your first patch.</div></div>
+              </section>
+              <section class="tip-card">
+                <span class="tip-decoration">✳</span>
+                <p class="eyebrow">A BETTER FIX STARTS WITH CONTEXT</p>
+                <h2>More context.<br>Fewer guesses.</h2>
+                <p>Start with the bug. Add repository context only if necessary. Search project knowledge if the repair still needs it.</p>
+                <button class="tip-link" data-view="knowledge">Explore your knowledge base <span>→</span></button>
+              </section>
+            </div>
+            <footer class="page-footer"><span>Patchwork <span class="footer-dot">·</span> Repository-aware repair</span><span>Built for thoughtful fixes <span class="footer-heart">♥</span></span></footer>
+          </section>
+
+          <section class="view-panel" id="view-repairs">
+            <div class="page-heading">
+              <div><p class="eyebrow"><span class="eyebrow-mark"></span>REPAIR QUEUE</p><h1>Every issue, in context.</h1><p class="heading-subtitle">Review, compare, and validate candidate fixes from one place.</p></div>
+              <button class="button button-primary" data-action="new-repair"><span class="button-plus">＋</span> Start a repair</button>
+            </div>
+            <div class="queue-toolbar surface-card">
+              <div class="filter-tabs" role="tablist" aria-label="Filter repairs">
+                <button class="filter-tab active" data-filter="all">All <span>0</span></button>
+                <button class="filter-tab" data-filter="review">Patches ready <span>0</span></button>
+                <button class="filter-tab" data-filter="running">Repairing <span>0</span></button>
+                <button class="filter-tab" data-filter="ready">Applied <span>0</span></button>
+              </div>
+              <label class="search-field"><span>⌕</span><input id="repairSearch" type="search" placeholder="Search repairs..." aria-label="Search repairs"></label>
+            </div>
+            <section class="surface-card queue-table-card">
+              <div class="queue-table-head"><span>ISSUE</span><span>LOCATION</span><span>SEVERITY</span><span>STATUS</span><span>UPDATED</span><span></span></div>
+              <div id="queueRows"></div>
+              <div class="empty-state" id="queueEmpty">Connect a repository and describe a bug to start the first real repair.</div>
+            </section>
+          </section>
+
+          <section class="view-panel" id="view-knowledge">
+            <div class="page-heading">
+              <div><p class="eyebrow"><span class="eyebrow-mark"></span><span id="knowledgeBreadcrumb">YOUR REPOSITORY</span> / KNOWLEDGE</p><h1>Context, connected.</h1><p class="heading-subtitle">A living map of the signals that guide every repair.</p></div>
+              <button class="button button-secondary" id="syncButton" disabled><span>↻</span> Re-index repository</button>
+            </div>
+            <div class="knowledge-summary">
+              <div class="knowledge-summary-main"><span class="large-repo-glyph">⌘</span><div><span class="repo-path" id="knowledgeSource">LOCAL REPOSITORY</span><h2><span id="knowledgeRepoName">No repository connected</span><span class="connected-pill" id="connectedBadge" hidden><i></i> Indexed</span></h2><p id="knowledgeRepoDetails">Connect a repository to inspect its real files, tests, and documentation.</p></div></div>
+              <div class="summary-metric"><strong id="indexedFileCount">0</strong><span>Files indexed</span></div><div class="summary-metric"><strong id="indexedTestCount">0</strong><span>Test files found</span></div><div class="summary-metric"><strong id="indexedDocCount">0</strong><span>Project documents</span></div>
+            </div>
+            <div class="layer-detail-grid">
+              <article class="layer-detail-card bug-detail"><div class="layer-detail-heading"><span class="layer-icon bug-icon">⌁</span><div><p class="eyebrow">LAYER 01 · FIRST</p><h2>Bug knowledge</h2></div><span class="detail-state"><i></i> Starts here</span></div><p class="detail-description">First, ask Groq to reason about only the reported failure and affected source.</p><div class="source-row"><span>⌕</span><span><strong>Failing source function</strong><small>Function context when the code is Python</small></span><span class="source-value">On demand</span></div><div class="source-row"><span>✓</span><span><strong>Your reported test output</strong><small>Test command, failure, and issue description</small></span><span class="source-value">User supplied</span></div><div class="source-row"><span>⌗</span><span><strong>AST location</strong><small>Python syntax-tree function extraction</small></span><span class="source-value" id="bugLayerStatus">Indexed</span></div><button class="text-button" data-action="view-signals">Only escalates if every patch fails <span>→</span></button></article>
+              <article class="layer-detail-card repo-detail"><div class="layer-detail-heading"><span class="layer-icon repo-icon">⌘</span><div><p class="eyebrow">LAYER 02 · IF NEEDED</p><h2>Repository knowledge</h2></div><span class="detail-state"><i></i> Escalates on failure</span></div><p class="detail-description">Add surrounding Python call relationships and available repository evidence only if necessary.</p><div class="source-row"><span>⌘</span><span><strong>Python AST definitions</strong><small>Cross-file references where detectable</small></span><span class="source-value" id="repoSourceCount">Awaiting index</span></div><div class="source-row"><span>◇</span><span><strong>Dependencies</strong><small>Checked-in dependency manifests</small></span><span class="source-value" id="dependencyCount">Awaiting index</span></div><div class="source-row"><span>↺</span><span><strong>Git co-change history</strong><small>Related files and source-file commits</small></span><span class="source-value">If Git is available</span></div><button class="text-button" data-action="view-signals">Missing signals are never invented <span>→</span></button></article>
+              <article class="layer-detail-card project-detail"><div class="layer-detail-heading"><span class="layer-icon project-icon">▤</span><div><p class="eyebrow">LAYER 03 · IF STILL NEEDED</p><h2>Project knowledge</h2></div><span class="detail-state"><i></i> Final escalation</span></div><p class="detail-description">Search the project's own documentation and checked-in issue-history text when earlier candidates fail.</p><div class="source-row"><span>▤</span><span><strong>Repository documentation</strong><small>Relevant checked-in docs ranked locally</small></span><span class="source-value" id="projectDocCount">0 documents</span></div><div class="source-row"><span>◎</span><span><strong>Checked-in issue history</strong><small>Issue notes or patch guidance in the repo</small></span><span class="source-value">Local only</span></div><div class="source-row"><span>◈</span><span><strong>Retrieval method</strong><small>Bounded keyword relevance, not embeddings</small></span><span class="source-value">Transparent</span></div><button class="text-button" data-action="view-signals">Paper-inspired, not paper's benchmark <span>→</span></button></article>
+            </div>
+            <div class="knowledge-note"><span>✳</span><p><strong>Context escalates one level at a time.</strong> Patchwork tests the Bug Knowledge candidates first. Repository and project context are added only when all candidates in the previous tier fail.</p><span class="note-equation">bug <b>→</b> repository <b>→</b> project</span></div>
+          </section>
+
+          <section class="view-panel" id="view-validation">
+            <div class="page-heading"><div><p class="eyebrow"><span class="eyebrow-mark"></span>QUALITY GATE</p><h1>Only test-passing patches survive.</h1><p class="heading-subtitle">Each candidate is tested separately in a temporary copy of your trusted repository.</p></div><span class="button button-static">Test results are reported live</span></div>
+            <div class="validation-banner"><div><span class="eyebrow light-eyebrow">PROGRESSIVE REPAIR</span><h2>Three layers.<br><span>One real test command.</span></h2><p>Start local tests only for repositories you trust.</p></div><div class="validation-bars"><div><span>Bug → repository → project</span><strong>Only as needed</strong><div><i style="width:100%"></i></div></div><div><span>Unsuccessful candidates</span><strong>Not retained</strong><div><i class="bar-rejected" style="width:100%"></i></div></div></div></div>
+            <div class="surface-card validation-list-card"><div class="section-header"><div><p class="eyebrow">THIS SESSION</p><h2>Live test results</h2></div></div><div id="validationRuns"><div class="validation-run empty-validation">Start a repair to see each candidate’s actual test output.</div></div></div>
+          </section>
+
+          <section class="view-panel" id="view-history">
+            <div class="page-heading"><div><p class="eyebrow"><span class="eyebrow-mark"></span>CHANGELOG</p><h1>Repair results, not promises.</h1><p class="heading-subtitle">This session’s actual candidate-test and patch-apply events.</p></div><button class="button button-secondary" id="exportHistory">↓ Export history</button></div>
+            <div class="history-stats"><div class="surface-card"><strong id="historyRepairCount">0</strong><span>Repairs started</span><small>This browser session</small></div><div class="surface-card"><strong id="historyPassingCount">0</strong><span>Patches passed tests</span><small>Verified individually</small></div><div class="surface-card"><strong id="historyAppliedCount">0</strong><span>Patches applied</span><small>Only after review</small></div></div>
+            <section class="surface-card history-card"><div class="section-header"><div><p class="eyebrow">CURRENT SESSION</p><h2>Repair activity</h2></div></div><div id="historyList"><div class="gentle-empty">Connect a repository to get started. Only real repair and test outcomes appear here.</div></div></section>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="repositoryModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="repositoryModalTitle">
+        <div class="modal-heading"><div><p class="eyebrow"><span class="eyebrow-mark"></span>YOUR CODE STAYS UNDER YOUR CONTROL</p><h2 id="repositoryModalTitle">Connect a repository.</h2><p>Select a local project, enter a public GitHub URL, or choose a ZIP.</p></div><button class="icon-button modal-close" data-action="close-repository" aria-label="Close dialog">×</button></div>
+        <div class="repo-source-tabs" role="tablist" aria-label="Repository source"><button class="repo-source-tab active" data-repo-source="local">Local folder</button><button class="repo-source-tab" data-repo-source="github">Public GitHub</button><button class="repo-source-tab" data-repo-source="zip">Upload ZIP</button></div>
+        <form id="repositoryForm">
+          <div class="repo-source-panel active" data-repo-panel="local"><label class="form-label" for="repositoryPath">Absolute path on this computer</label><input class="form-input" id="repositoryPath" placeholder="C:\Users\you\projects\my-app" autocomplete="off"><small class="field-help">Patchwork runs on this computer. Paste the project path from File Explorer.</small></div>
+          <div class="repo-source-panel" data-repo-panel="github" hidden><label class="form-label" for="repositoryUrl">Public GitHub repository URL</label><input class="form-input" id="repositoryUrl" placeholder="https://github.com/owner/repository" autocomplete="url"><small class="field-help">Only public repositories at github.com over HTTPS are supported. Private repository credentials aren’t collected.</small></div>
+          <div class="repo-source-panel" data-repo-panel="zip" hidden><label class="form-label" for="repositoryZip">Repository ZIP file</label><label class="upload-zone repository-upload" for="repositoryZip"><span class="upload-icon">↑</span><span><strong id="repositoryZipName">Choose a ZIP containing your project</strong><small>Up to 50 MB · files are safely extracted to this local app</small></span><input id="repositoryZip" type="file" accept=".zip,application/zip"></label></div>
+          <div class="repository-privacy"><span>◈</span><span><strong>Repository files are scanned locally.</strong><small>Connecting needs no Groq key and sends no code to Groq. AI repairs need a server-side key; you’ll review context before sharing.</small></span></div>
+          <div class="form-error" id="repositoryError" role="alert" hidden></div>
+          <button class="button button-primary modal-submit" id="connectRepositoryButton" type="submit">Index repository</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="repairModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-heading"><div><p class="eyebrow"><span class="eyebrow-mark"></span><span id="repairRepositoryLabel">NEW REPAIR</span></p><h2 id="modalTitle">Describe the failing behavior.</h2><p>Only context needed for this specific bug is used.</p></div><button class="icon-button modal-close" data-action="close-modal" aria-label="Close dialog">×</button></div>
+        <form id="repairForm">
+          <div class="repair-selected-repo" id="repairSelectedRepository"><span class="repo-glyph">⌘</span><span>No repository connected</span><button type="button" class="text-button" data-action="open-repository">Change</button></div>
+          <label class="form-label" for="filePath">Failing source file <span>(choose a real indexed file)</span></label><select class="form-input" id="filePath" required disabled><option value="">Connect a repository first</option></select>
+          <label class="form-label" for="issueTitle">What should happen, and what happened instead?</label>
+          <textarea class="form-input form-textarea" id="issueTitle" name="title" rows="3" placeholder="Describe the bug and the expected behavior..." required></textarea>
+          <label class="form-label" for="errorDetails">Failing test output or stack trace <span>(optional)</span></label>
+          <textarea class="form-input form-textarea log-input" id="errorDetails" rows="4" placeholder="Paste the real error, failed assertion, or stack trace..."></textarea>
+          <label class="form-label" for="testCommand">Exact test command that should pass after the fix</label>
+          <input class="form-input" id="testCommand" placeholder="python -m pytest -q tests/test_example.py" required>
+          <small class="field-help">Allowed runners: Python, pytest, Node.js, Go, Cargo, dotnet, Java. Enter one command without shell operators.</small>
+          <label class="consent-row"><input type="checkbox" id="testConsent"><span><strong>I trust this repository and its tests.</strong><small>Test commands execute real project code on this computer and may access its files. Review your repository before agreeing.</small></span></label>
+          <label class="consent-row data-consent"><input type="checkbox" id="shareConsent"><span><strong>Send selected code and bug context to Groq for patch generation.</strong><small>Groq receives the reported bug, selected source, and only the knowledge tier currently being tried. Secrets are filtered. You are responsible for authorizing this disclosure.</small></span></label>
+          <div class="form-error" id="repairError" role="alert" hidden></div>
+          <button class="button button-primary modal-submit" id="startRepairButton" type="submit"><span>✳</span> Generate and test candidate patches</button>
+          <p class="modal-disclaimer">Each candidate is tested separately. Only test-passing diffs are shown. Nothing changes in the original repository until you review and apply a patch.</p>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="detailModal" hidden>
+      <section class="modal detail-modal" role="dialog" aria-labelledby="detailTitle">
+        <div id="detailContent"></div>
+        <button class="icon-button modal-close detail-close" data-action="close-detail" aria-label="Close dialog">×</button>
+      </section>
+    </div>
+    <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>
